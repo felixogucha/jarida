@@ -275,6 +275,7 @@
 $('#publish_issue').click(function(){
   $("#modal-simple").modal("show");
   //unpublishIssue?key='.$al_issues->issue_id.'"
+    
     var href = $('#publish_issue').attr('href');
     var st = href.split('?');
     var splitOther = st[1].split('=');
@@ -297,6 +298,7 @@ $('#publish_issue').click(function(){
       }
 
     });
+
   return false;
 });
 </script>

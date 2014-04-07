@@ -259,6 +259,21 @@ class Insert extends CI_Controller {
 		redirect('jarida/magazines');
 	}
 
+	public function upload()
+	{
+		$mag_issue['upload_path'] = './mag_issues';
+		$mag_issue['allowed_types'] = 'pdf|doc|docx';
+		$mag_issue['max_size'] = '0';
+		//$mag_issue['file_name'] = $magazine_name.'_'.$this->input->post('issue_no');
+
+		$this->load->library('upload', $mag_issue);
+		$upload = $this->upload->do_upload('issue_url');
+		$file_data = $this->upload->data();
+		$file_url = $file_data['file_name'];
+		echo $file_url;
+		print_r($file_data);
+	}
+
 	public function addIssue()
 	{
 		//echo $this->input->post('magazine_id');
@@ -268,7 +283,7 @@ class Insert extends CI_Controller {
 			$magazine_name = $magazine->magazine_name;
 			$mag_issue['upload_path'] = './mag_issues';
 			$mag_issue['allowed_types'] = 'pdf|doc|docx';
-			$mag_issue['max_size'] = '522240';
+			$mag_issue['max_size'] = '0';
 			$mag_issue['file_name'] = $magazine_name.'_'.$this->input->post('issue_no');
 
 			$this->load->library('upload', $mag_issue);

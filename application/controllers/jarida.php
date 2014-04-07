@@ -264,6 +264,20 @@ class Jarida extends CI_Controller {
 		redirect('jarida/magCategory');
 	}
 
+	public function upload() {		
+		$data['main_content'] = 'upload';
+		$data['title'] = "upload | ".$this->app_title['title_message'];
+		$data['name'] = "upload";
+		$this->load->view('includes/template', $data);
+	}
+
+	public function getAllMagazines()
+	{
+		$this->load->model('select');
+		$res = $this->select->getAllMagazines();
+		//print_r($res);
+	}
+
 	public function issues()
 	{
 		$this->load->model('select');
@@ -297,7 +311,8 @@ class Jarida extends CI_Controller {
 	$magazine = $this->select->getSpecific('mag_issues', 'issue_id', $this->input->get('key'));
 		if ($magazine) {
 			$file_name = $magazine->file_name;
-			$gen_issuepages = $this->generateIssueImages($file_name, $this->input->get('key'));
+			$magazine_id = $magazine->magazine_id;
+			$gen_issuepages = $this->generateIssueImages($file_name, $this->input->get('key'), $magazine_id);
 			if ($gen_issuepages) {
 				$update_info = array(
 					'status_id' => '1',
@@ -337,7 +352,7 @@ class Jarida extends CI_Controller {
 		
 	}
 
-	public function generateIssueImages($file_name, $issue_id){
+	public function generateIssueImages($file_name, $issue_id, $magazine_id){
 		$ret = true;
 		$result = $this->generateImages($file_name, $issue_id);
 		if (!is_null($result)) {
@@ -352,6 +367,13 @@ class Jarida extends CI_Controller {
 					if (!$res) {
 						$ret = false;
 						exit;
+					} else {
+						$this->db->where('magazine_id', $magazine_id);
+						$update_mag = $this->db->update('magazine', array('image' => $image_url));
+						if (!$update_mag) {
+							$ret = false;
+							exit;
+						}
 					}
 				}
 				$this->load->model('insert_model');
@@ -370,14 +392,59 @@ class Jarida extends CI_Controller {
 
 	public function unpublishIssue()
 	{
-		$update_info = array(
-			'status_id' => '2',
-			'issue_suppressed_by' => $this->session->userdata('user_id'),
-			'suppressed_on' => date('Y-m-d')
-			);
-		$this->load->model('dbupdate');
-		$update = $this->dbupdate->updateData('mag_issues', 'issue_id', $this->input->get('key'), $update_info);
-		if ($update) {
+		//delete its issue_pages from database
+		$ret = true;
+		$this->load->model('dbdelete');
+		$delete_issue_pages = $this->dbdelete->deleteFrom('issue_pages', 'issue_id', $this->input->get('key'));
+		$magazine_id = '';
+		if ($delete_issue_pages) {
+			//delete its issue pages from hdd
+			$this->load->model('select');
+			$issue_details = $this->select->getSpecific('mag_issues', 'issue_id', $this->input->get('key'));
+			if ($issue_details) {
+				$magazine_id = $issue_details->magazine_id;
+				$file_name = $issue_details->file_name;
+				$exp = explode('.', $file_name);
+				$dir = realpath(base_url().'mag_issues').'./mag_issues/'.$exp[0];
+				$this->rmdir_recursive($dir);
+
+				//updating magazine issue details
+				$update_info = array(
+					'status_id' => '2',
+					'issue_suppressed_by' => $this->session->userdata('user_id'),
+					'suppressed_on' => date('Y-m-d'),
+					'title_image' => ''
+					);
+				$this->load->model('dbupdate');
+				$update = $this->dbupdate->updateData('mag_issues', 'issue_id', $this->input->get('key'), $update_info);
+				if ($update) {
+					$sql = "SELECT * FROM mag_issues WHERE title_image != '' and magazine_id = '".$magazine_id."';";
+					$query = $this->db->query($sql);
+					$data = array();
+					if($query->num_rows() > 0){
+						foreach ($query->result() as $rows) {
+							$data[] = $rows->title_image;
+						}
+						$title_image = end($data);
+						$this->db->where('magazine_id', $magazine_id);
+						$update_mag = $this->db->update('magazine', array('image' => $title_image));
+					} else {
+						$this->db->where('magazine_id', $magazine_id);
+						$update_mag = $this->db->update('magazine', array('image' => ''));
+					}
+				} else {
+					$ret = false;;
+				}
+				
+			}
+			else  {
+				$ret = false;
+			}
+		} else {
+			$ret = false;
+		}
+
+		if ($ret) {
 			$newdata = array('unpublish_iss'  => 'y');
 			$this->session->set_userdata($newdata);
 		} else {
@@ -385,15 +452,16 @@ class Jarida extends CI_Controller {
 			$this->session->set_userdata($newdata);
 		}
 		redirect('jarida/issues');
-		
 	}
 
 	public function deleteMagIssue()
 	{
 		$this->load->model('select');
 		$issue_details = $this->select->getSpecific('mag_issues', 'issue_id', $this->input->get('key'));
+		$magazine_id = '';
 		if ($issue_details) {
 			$file_name = $issue_details->file_name;
+			$magazine_id = $issue_details->magazine_id;
 			$exp = explode('.', $file_name);
 			$dir = realpath(base_url().'mag_issues').'./mag_issues/'.$exp[0];
 			$this->rmdir_recursive($dir);
@@ -401,11 +469,29 @@ class Jarida extends CI_Controller {
 			$this->load->model('dbdelete');
 			$delete_issue_pages = $this->dbdelete->deleteFrom('issue_pages', 'issue_id', $this->input->get('key'));
 			if ($delete_issue_pages) {
-				$this->load->model('dbdelete');
+				//$this->load->model('dbdelete');
 				$res = $this->dbdelete->deleteFrom('mag_issues', 'issue_id', $this->input->get('key'));
 				if($res) {
-					$newdata = array('del_issue'  => 'y');
-					$this->session->set_userdata($newdata);
+					$sql = "SELECT * FROM mag_issues WHERE title_image != '' and magazine_id = '".$magazine_id."';";
+					$query = $this->db->query($sql);
+					$data = array();
+					if($query->num_rows() > 0){
+						foreach ($query->result() as $rows) {
+							$data[] = $rows->title_image;
+						}
+						$title_image = end($data);
+						$this->db->where('magazine_id', $magazine_id);
+						$update_mag = $this->db->update('magazine', array('image' => $title_image));
+						
+						$newdata = array('del_issue'  => 'y');
+						$this->session->set_userdata($newdata);
+					} else {
+						$this->db->where('magazine_id', $magazine_id);
+						$update_mag = $this->db->update('magazine', array('image' => ''));
+
+						$newdata = array('del_issue'  => 'y');
+						$this->session->set_userdata($newdata);
+					}
 				} else {
 					$newdata = array('del_issue'  => 'n');
 					$this->session->set_userdata($newdata);
@@ -415,8 +501,15 @@ class Jarida extends CI_Controller {
 				$this->session->set_userdata($newdata);
 			}
 		} else {
-			$newdata = array('del_issue'  => 'n');
-			$this->session->set_userdata($newdata);
+			$this->load->model('dbdelete');
+			$delete_issue_pages = $this->dbdelete->deleteFrom('issue_pages', 'issue_id', $this->input->get('key'));
+			if ($delete_issue_pages) {
+				$newdata = array('del_issue'  => 'y');
+				$this->session->set_userdata($newdata);
+			} else {
+				$newdata = array('del_issue'  => 'n');
+				$this->session->set_userdata($newdata);
+			}
 		}
 		redirect('jarida/issues');
 	}
@@ -891,6 +984,11 @@ class Jarida extends CI_Controller {
 		echo str_replace('\\
 
 			', '', $str);
+	}
+
+	public function apppath()
+	{
+		echo FCPATH.'mag_images/adt';
 	}
 
 }

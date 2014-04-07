@@ -91,6 +91,123 @@ class Mobile extends REST_Controller {
         $this->response(NULL, 400);
     }
 
+    /* -------------------------------------------------------------------- all issues within a specified range-------------------------------------------------------------------- */
+
+    public function pageRanges_get()
+    {
+        $this->load->model('select');//issueRange($issue_id, $from, $to)
+        $all_issues = $this->select->pageRange($this->get('id'), $this->get('limit'), $this->get('offset'));
+        if ($all_issues) {
+            $this->response($all_issues, 200);// 200 being the HTTP response code
+        } else {
+            $this->response(NULL, 400);// 200 being the HTTP response code
+        }
+
+    }
+
+    public function pageRanges_post()
+    {
+        $this->load->model('select');
+        $all_magazines = $this->select->pageRange($this->post('id'), $this->post('limit'), $this->post('offset'));
+         if ($all_issues) {
+            $this->response($all_issues, 200);// 200 being the HTTP response code
+        } else {
+            $this->response(NULL, 400);// 200 being the HTTP response code
+        }
+        
+    }
+
+    public function pageRanges_put()
+    {
+        // create new magazines and respond with a status/errors
+        $this->response(NULL, 400);
+    }
+ 
+    public function pageRanges_delete()
+    {
+        // delete magazines and respond with a status/errors
+        $this->response(NULL, 400);
+    }
+
+
+
+
+/* -------------------------------------------------------------------- all issues in a magazine-------------------------------------------------------------------- */
+
+    public function magazineIssues_get()
+    {
+        $this->load->model('select');//specificMagazine($magazine_id, $limit, $offset)
+        $all_issues = $this->select->specificMagazine($this->get('magazine_id'), $this->get('limit'), $this->get('offset'));
+        if ($all_issues) {
+            $this->response($all_issues, 200);// 200 being the HTTP response code
+        } else {
+            $this->response(NULL, 400);// 200 being the HTTP response code
+        }
+
+    }
+
+    public function magazineIssues_post()
+    {
+        $this->load->model('select');
+        $all_magazines = $this->select->specificMagazine($this->post('magazine_id'), $this->post('limit'), $this->post('offset'));
+         if ($all_issues) {
+            $this->response($all_issues, 200);// 200 being the HTTP response code
+        } else {
+            $this->response(NULL, 400);// 200 being the HTTP response code
+        }
+        
+    }
+
+    public function magazineIssues_put()
+    {
+        // create new magazines and respond with a status/errors
+        $this->response(NULL, 400);
+    }
+ 
+    public function magazineIssues_delete()
+    {
+        // delete magazines and respond with a status/errors
+        $this->response(NULL, 400);
+    }
+
+     /* -------------------------------------------------------------------- all magazines within a specified range-------------------------------------------------------------------- */
+
+    public function magazineRanges_get()
+    {
+        $this->load->model('select');//issueRange($issue_id, $from, $to)
+        $all_issues = $this->select->magazineRange($this->get('limit'), $this->get('offset'));
+        if ($all_issues) {
+            $this->response($all_issues, 200);// 200 being the HTTP response code
+        } else {
+            $this->response(NULL, 400);// 200 being the HTTP response code
+        }
+
+    }
+
+    public function magazineRanges_post()
+    {
+        $this->load->model('select');
+        $all_magazines = $this->select->magazineRange($this->post('limit'), $this->post('offset'));
+         if ($all_issues) {
+            $this->response($all_issues, 200);// 200 being the HTTP response code
+        } else {
+            $this->response(NULL, 400);// 200 being the HTTP response code
+        }
+        
+    }
+
+    public function magazineRanges_put()
+    {
+        // create new magazines and respond with a status/errors
+        $this->response(NULL, 400);
+    }
+ 
+    public function magazineRanges_delete()
+    {
+        // delete magazines and respond with a status/errors
+        $this->response(NULL, 400);
+    }
+
     /* -------------------------------------------------------------------- specific magazine -------------------------------------------------------------------- */
     public function magazine_get()
     {

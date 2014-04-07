@@ -53,8 +53,16 @@ table tr td {
 			<td> : Get a specific magazine. Requires a magazine_id input</td>
 		</tr>
 		<tr>
+			<td><a href="<?php echo site_url('mobile/magazineRanges/limit/10/offset/0');?>">Magazines with page range</a></td>
+			<td> : Get all registered and published magazines within a range that you specify</td>
+		</tr>
+		<tr>
 			<td><a href="<?php echo site_url('mobile/issues');?>">Magazine Issues</a></td>
-			<td> : Get all magazine issues.</td>
+			<td> : Get all published issues.</td>
+		</tr>
+		<tr>
+			<td><a href="<?php echo site_url('mobile/magazineIssues/magazine_id/2/limit/10/offset/0');?>">Specific Magazine Issues</a></td>
+			<td> : Get all issues in a specific magazine within a specified range.</td>
 		</tr>
 		<tr>
 			<td><a href="<?php echo site_url('mobile/issue/id/1');?>">Specific Issue Details</a></td>
@@ -62,9 +70,13 @@ table tr td {
 			<!-- <li><a id="ajax" href="<?php echo site_url('api/example/users/format/json');?>">Users</a> - get it in JSON (AJAX request)</li> -->
 		</tr>
 		<tr>
-			<td><a href="<?php echo site_url('mobile/issuePages/id/1');?>">Specific Issue Pages</a></td>
+			<td><a href="<?php echo site_url('mobile/issuePages/id/7');?>">Specific Issue Pages</a></td>
 			<td> : Get pages of a specific issue</td>
 			<!-- <li><a id="ajax" href="<?php echo site_url('api/example/users/format/json');?>">Users</a> - get it in JSON (AJAX request)</li> -->
+		</tr>
+		<tr>
+			<td><a href="<?php echo site_url('mobile/pageRanges/id/7/limit/8/offset/0');?>">Issues with page range</a></td>
+			<td> : Get all registered and published issue pages within a range that you specify</td>
 		</tr>
 		</br>
 		</br>

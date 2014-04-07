@@ -135,6 +135,59 @@ class Select extends CI_Model {
 		}
 	}
 
+	public function magazineRange($limit, $offset)
+	{
+		$this->db->select("*");
+		$this->db->from("viewmagazines");
+		$this->db->limit($limit, $offset);
+		$query = $this->db->get();
+
+		if($query->num_rows() > 0)
+		{
+			foreach ($query->result() as $rows) {
+				$data[] = $rows;
+			}
+			return $data;
+		}
+	}
+
+	public function pageRange($issue_id, $limit, $offset)
+	{
+		$this->db->select("*");
+		$this->db->from("issue_pages");
+		$this->db->where('issue_id', $issue_id);
+		$this->db->limit($limit, $offset);
+		$query = $this->db->get();
+		//$query = $this->db->query($sql, array($issue_id, $from, $to));
+
+		if($query->num_rows() > 0)
+		{
+			foreach ($query->result() as $rows) {
+				$data[] = $rows;
+			}
+			return $data;
+		}
+	}
+
+
+	public function specificMagazine($magazine_id, $limit, $offset)
+	{
+		$this->db->select("*");
+		$this->db->from("viewmagazines");
+		$this->db->where('magazine_id', $magazine_id);
+		$this->db->limit($limit, $offset);
+		$query = $this->db->get();
+		//$query = $this->db->query($sql, array($issue_id, $from, $to));
+
+		if($query->num_rows() > 0)
+		{
+			foreach ($query->result() as $rows) {
+				$data[] = $rows;
+			}
+			return $data;
+		}
+	}
+
 	/*
 	public function settings()
 	{
